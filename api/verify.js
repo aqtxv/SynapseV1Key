@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   const { rows } = await pool.query(
-    "SELECT expires_at FROM keys WHERE license_key = $1",
+    "SELECT expires_at FROM keys WHERE key = $1",
     [key]
   );
 
@@ -24,9 +24,7 @@ export default async function handler(req, res) {
     return res.json({ valid: false });
   }
 
-  const expiresAt = rows[0].expires_at;
-
-  if (expiresAt && new Date(expiresAt) < new Date()) {
+  if (new Date(rows[0].expires_at) < new Date()) {
     return res.json({ valid: false });
   }
 
