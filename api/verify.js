@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   const { rows } = await pool.query(
-    "SELECT expires_at FROM keys WHERE key = $1",
+    "SELECT expires_at FROM keys WHERE license_key = $1",
     [key]
   );
 
