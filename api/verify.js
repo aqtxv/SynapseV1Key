@@ -9,14 +9,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { key, hwid } = req.body;
+  const { key } = req.body;
 
-  if (!key || !hwid) {
+  if (!key) {
     return res.json({ valid: false });
   }
 
   const { rows } = await pool.query(
-    "SELECT * FROM keys WHERE key = $1",
+    "SELECT expires_at FROM keys WHERE key = $1",
     [key]
   );
 
@@ -24,21 +24,9 @@ export default async function handler(req, res) {
     return res.json({ valid: false });
   }
 
-  const row = rows[0];
+  const expiresAt = rows[0].expires_at;
 
-  if (new Date(row.expires_at) < new Date()) {
-    return res.json({ valid: false });
-  }
-
-  if (!row.hwid) {
-    await pool.query(
-      "UPDATE keys SET hwid = $1 WHERE key = $2",
-      [hwid, key]
-    );
-    return res.json({ valid: true });
-  }
-
-  if (row.hwid !== hwid) {
+  if (expiresAt && new Date(expiresAt) < new Date()) {
     return res.json({ valid: false });
   }
 
